@@ -117,7 +117,8 @@ int main()
     gsl_matrix* w1 = gsl_matrix_alloc(7, 7);
 
     wf1InitialWeight(w1);
-    gsl_vector* b1 = irls_linear_regression(y1, x1, w1, weightFunction1);
+    gsl_vector* b1 = gsl_vector_alloc(3);
+    irls_linear_regression(y1, x1, w1, weightFunction1, b1, nullptr, nullptr);
     cout << "Result of test1, irls" << endl;
     printGSLVector(b1);
     gsl_vector_free(b1);
@@ -154,20 +155,27 @@ int main()
     initGSLMatrix(x2, data2x);
     initGSLVector(y2, data2y);
     gsl_matrix* w2 = gsl_matrix_alloc(10, 10);
+    gsl_matrix* cov2 = gsl_matrix_alloc(3, 3);
+    gsl_vector* b2 = gsl_vector_alloc(3);
+    double chisq;
 
     wf1InitialWeight(w2);
-    gsl_vector* b2 = irls_linear_regression(y2, x2, w2, weightFunction1);
+    irls_linear_regression(y2, x2, w2, weightFunction1, b2, cov2, &chisq);
     cout << "Result of test2, irls" << endl;
     printGSLVector(b2);
-    gsl_vector_free(b2);
+    cout << "Covariance, chisq "<<chisq<<endl;
+    printGSLMatrix(cov2);
 
     WeightFunction2 wf2(data2Sample, 10);
     wf2.initialWeight(y2, w2);
-    b2 = irls_linear_regression(y2, x2, w2, wf2);
+    irls_linear_regression(y2, x2, w2, wf2, b2, cov2, &chisq);
     cout << "Result of test2, weight method 2" << endl;
     printGSLVector(b2);
-    gsl_vector_free(b2);
+    cout << "Covariance, chisq "<<chisq<<endl;
+    printGSLMatrix(cov2);
 
+    gsl_vector_free(b2);
+    gsl_matrix_free(cov2);
     gsl_matrix_free(w2);
     gsl_vector_free(y2);
     gsl_matrix_free(x2);
